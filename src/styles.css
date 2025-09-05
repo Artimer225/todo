@@ -1,0 +1,107 @@
+html,
+body {
+    margin: 0;
+    padding: 0;
+}
+
+p {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: rgb(24, 24, 24);
+    display: grid;
+    grid-template-columns: 300px 0.5fr 1fr 0.5fr;
+}
+
+header {
+    grid-column: 1 / 2;
+}
+
+header nav {
+    display: flex;
+    flex-direction: column;
+}
+
+#content {
+    grid-column: 3 / 4;
+}
+
+
+nav button {
+    background-color: transparent;
+    color: #686868;
+    font-size: x-large;
+    text-align: left;
+    border: 1px solid transparent;
+    border-radius: 6px;
+}
+
+nav button:hover {
+    color: white;
+    background-color: #686868;
+}
+
+.projects {
+    display: grid;
+    /*justify-items: center;*/
+    row-gap: 50px;
+    background-color: rgb(44, 44, 44);
+    border: 1px solid white;
+}
+
+.projects .title {
+    justify-self: center;
+    color: white;
+    font-size: xxx-large;
+}
+
+.wrapper {
+    margin-left: 10px;
+}
+
+.wrapper p {
+    color: white;
+}
+
+.wrapper .projectName {
+    font-size: xx-large;
+    font-weight: bold;
+}
+
+.projectItem {
+    display: flex;
+    gap: 5px;
+}
+
+.checkboxItem {
+    height: 22px;
+    border-radius: 50%;
+    border: 1px solid;
+    background-color: transparent;
+    transition: background-color .25s;
+}
+
+.checkboxItem p {
+    color: transparent;
+    transition: color .25s;
+}
+
+.checkboxItem:hover p {
+    cursor: pointer;
+    color: grey;
+    transition: color .25s;
+}
+
+.projectItem .itemName {
+    font-size: x-large;
+}
+
+.projectItem .itemDesc {
+    color: rgb(204, 204, 204);
+}
+
+.itemContainer:hover {
+    cursor: pointer;
+}
