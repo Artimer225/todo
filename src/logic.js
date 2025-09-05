@@ -1,10 +1,4 @@
 const logic = (function () {
-    // const adder = {
-    //     set items(item) {
-    //         this.items.push(item)
-    //     }
-    // };
-
     const remover = {
         removeItem(item) {
             const removeItem = this.items.indexOf(item);
@@ -34,8 +28,6 @@ const logic = (function () {
         };
     }
 
-    // Object.assign(ProjectCollection.prototype, getter);
-    // Object.assign(ProjectCollection.prototype, adder);
     Object.assign(ProjectCollection.prototype, remover);
 
     class Project {
