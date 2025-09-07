@@ -16,7 +16,7 @@ const logic = (function () {
 
     class ProjectCollection {
         constructor() {
-            this._items = []
+            this._items = [];
         };
 
         set items(item) {
@@ -34,6 +34,7 @@ const logic = (function () {
         constructor(name) {
             this.name = name;
             this._items = [];
+            this._id = crypto.randomUUID();
         };
 
         set items(item) {
@@ -56,23 +57,20 @@ const logic = (function () {
             this.priority = priority;
             this.dueDate = dueDate;
             this.status = status;
+            this._id = crypto.randomUUID();
         };
 
-        set changeDescription(text) {
-            this.description = text;
-        };
-
-        set changePriority(num) {
-            this.priority = num;
-        };
-
-        set changeDueDate(date) {
-            this.dueDate = date;
-        };
-
-        set changeStatus(num) {
-            this.status = num;
-        }
+        // set changePriority(num) {
+        //     this.priority = num;
+        // };
+        //
+        // set changeDueDate(date) {
+        //     this.dueDate = date;
+        // };
+        //
+        // set changeStatus(num) {
+        //     this.status = num;
+        // }
 
     }
 
@@ -85,7 +83,10 @@ const projectStorage = new logic.ProjectCollection();
 const testProject = new logic.Project('Very Cool Project');
 testProject.items = new logic.ProjectItem('Cook bolognese for lunch', 'I need to buy some macaroni');
 testProject.items = new logic.ProjectItem('Play some Armored Core');
+const anotherTestProject = new logic.Project('Another Good Project');
+anotherTestProject.items = new logic.ProjectItem('Beat the shit out of Dark Souls boss');
 projectStorage.items = testProject;
+projectStorage.items = anotherTestProject;
 
 
 export { logic, projectStorage };
