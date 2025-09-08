@@ -78,20 +78,24 @@ nav button:hover {
 .checkboxItem {
     height: 22px;
     border-radius: 50%;
-    border: 1px solid;
+    border: 1px solid white;
     background-color: transparent;
-    transition: background-color .25s;
-}
-
-.checkboxItem p {
     color: transparent;
-    transition: color .25s;
+    transition:
+            color .25s,
+            background-color .25s;
 }
 
-.checkboxItem:hover p {
+.checkboxItem:hover {
     cursor: pointer;
     color: grey;
     transition: color .25s;
+}
+
+.checkboxItem.pressed {
+    color: white;
+    /*background-color: violet;*/
+    /*transition: color .25s;*/
 }
 
 .projectItem .itemName {
@@ -104,4 +108,62 @@ nav button:hover {
 
 .itemContainer:hover {
     cursor: pointer;
+}
+
+.itemName.done {
+    text-decoration: line-through;
+}
+
+.itemDesc.done {
+    text-decoration: line-through;
+}
+
+#itemEditDialog {
+    height: 800px;
+    width: 800px;
+    background-color: #2c2c2c;
+    border: 1px solid transparent;
+    border-radius: 8px;
+}
+
+#itemEditDialog .itemEditForm {
+    display: grid;
+    grid-template-columns: 1fr 0.3fr;
+}
+
+.itemEdit {
+    display: grid;
+    /*grid-template-columns: 1fr 0.2fr;*/
+    row-gap: 5px;
+}
+
+.itemEditButtons {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+    grid-column: 1 / 2;
+}
+
+textarea[name*='item'] {
+    background-color: #1E1E1E;
+    color: white;
+    border-radius: 4px;
+    resize: none;
+    min-height: 18px;
+}
+
+textarea[name='itemName'] {
+    font-size: 20px;
+}
+
+textarea[name='itemDesc'] {
+    font-size: 15px
+}
+
+.itemEditAux {
+    display: grid;
+    justify-items: end;
+    align-items: start;
+    grid-column: 2 / 3;
+    grid-row: 1 / 2;
 }

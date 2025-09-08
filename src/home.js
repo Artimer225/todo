@@ -15,27 +15,29 @@ const home= (function () {
         itemEditForm.setAttribute('method', 'dialog');
         const itemEdit = document.createElement('div');
         itemEdit.classList.add('itemEdit');
-        // const labelName = document.createElement('label');
-        // labelName.setAttribute('for', 'changeName');
-        const inputName = document.createElement('input');
+        const inputName = document.createElement('textarea');
         inputName.setAttribute('name', 'itemName');
-
-        // const labelDesc = document.createElement('label');
-        // labelDesc.setAttribute('for', 'changeDesc');
-        const inputDesc = document.createElement('input');
+        const inputDesc = document.createElement('textarea');
         inputDesc.setAttribute('name', 'itemDesc');
 
-
+        // create auxiliary inputs, such as date input and priority selector
+        const itemEditAux = document.createElement('div');
+        itemEditAux.classList.add('itemEditAux');
+        const inputDate = document.createElement('input');
+        inputDate.setAttribute('type', 'date');
+        inputDate.setAttribute('name', 'dueDate');
+        inputDate.setAttribute('value', '');
+        inputDate.setAttribute('min', '');
+        itemEditAux.appendChild(inputDate);
 
         // create buttons for editForm
-
         const itemEditButtons = document.createElement('div');
         itemEditButtons.classList.add('itemEditButtons');
         const cancelEditButton = document.createElement('input');
-        cancelEditButton.setAttribute('value', 'cancel');
+        cancelEditButton.setAttribute('value', 'Cancel');
         cancelEditButton.setAttribute('type', 'submit');
         const confirmEditButton = document.createElement('input');
-        confirmEditButton.setAttribute('value', 'confirm');
+        confirmEditButton.setAttribute('value', 'Save');
         confirmEditButton.setAttribute('type', 'submit');
         itemEditButtons.appendChild(cancelEditButton);
         itemEditButtons.appendChild(confirmEditButton);
@@ -47,6 +49,7 @@ const home= (function () {
         // itemEdit.appendChild(labelDesc);
         itemEdit.appendChild(inputDesc);
         itemEditForm.appendChild(itemEditButtons)
+        itemEditForm.appendChild(itemEditAux);
 
         content.appendChild(itemDialog);
     }
@@ -68,17 +71,22 @@ const home= (function () {
                     if (itemContainer.lastChild.className === 'itemDesc') {
                         itemDesc = itemContainer.lastChild.innerText;
                     }
-                    let dialogItemName = this.dialog.querySelector('input[name="itemName"]');
-                    let dialogItemDesc = this.dialog.querySelector('input[name="itemDesc"]');
+                    const itemDate = itemContainer.dataset.itemdate;
+                    let dialogItemName = this.dialog.querySelector('textarea[name="itemName"]');
+                    let dialogItemDesc = this.dialog.querySelector('textarea[name="itemDesc"]');
+                    let dialogItemDate = this.dialog.querySelector('input[name="dueDate"]');
                     dialogItemName.value = itemName;
                     dialogItemDesc.value = itemDesc;
+                    // console.log(itemDate)
+                    dialogItemDate.value = itemDate;
+                    dialogItemDate.min = itemDate;
                     this.dialog.showModal()
-                    // console.log(projectStorage)
                 }
             })
 
             this.content.addEventListener('submit', e => {
-                if (e.target.closest('.itemEditForm') && (e.submitter.value === 'confirm')) {
+                if (e.target.closest('.itemEditForm') && (e.submitter.value === 'Save')) {
+                    e.preventDefault()
                     const itemInputs = Object.fromEntries(new FormData(e.target).entries());
                     const dialogItemName = this.dialog.querySelector('input[name="itemName"]');
                     const dialogItemDesc = this.dialog.querySelector('input[name="itemDesc"]');
@@ -89,25 +97,66 @@ const home= (function () {
                     const currentItemElement = document.querySelector(`.itemContainer[data-itemid="${dialogItemId}"]`);
                     let currentItemName = currentItemElement.querySelector('.itemName');
                     let currentItemDesc = currentItemElement.querySelector('.itemDesc');
+                    let currentItemDate = currentItemElement.dataset.itemdate;
                     if (!(currentItemName.innerText === itemInputs.itemName)) {
                         this.findItem(dialogProjectId, dialogItemId, this.changeName, itemInputs.itemName);
                         currentItemName.innerText = itemInputs.itemName;
-                        // console.log(projectStorage)
                     }
                     if (!(currentItemDesc.innerText === itemInputs.itemDesc)) {
                         this.findItem(dialogProjectId, dialogItemId, this.changeDesc, itemInputs.itemDesc);
                         currentItemDesc.innerText = itemInputs.itemDesc;
-                        // console.log(projectStorage)
                     }
-                    e.preventDefault()
+                    if (!(currentItemDate === itemInputs.dueDate)) {
+                        this.findItem(dialogProjectId, dialogItemId, this.changeDate, itemInputs.dueDate)
+                        currentItemElement.dataset.itemdate = itemInputs.dueDate;
+                    }
+
                     this.dialog.close()
-                } else if (e.target.closest('.itemEditForm') && (e.submitter.value === 'cancel')) {
+                } else if (e.target.closest('.itemEditForm') && (e.submitter.value === 'Cancel')) {
                     e.preventDefault()
                     this.dialog.close()
                 }
             })
+
+            this.content.addEventListener('click', e => {
+                if (e.target.closest('.checkboxItem')) {
+                    console.log(projectStorage._items[0]._items[0].status);
+                    const itemId = e.target.closest('.checkboxItem').dataset.itemid;
+                    const projectId = e.target.closest('.wrapper').dataset.projectid;
+                    const projectItem = e.target.closest('.projectItem');
+                    const itemName = projectItem.querySelector('.itemName');
+                    const itemDesc = projectItem.querySelector('.itemDesc');
+
+                    this.checkboxFindItem(projectId, itemId);
+                    e.target.classList.toggle('pressed');
+                    itemName.classList.toggle('done');
+                    itemDesc.classList.toggle('done');
+                }
+            })
+
+            // autoresize textareas with users input, so they won't be cooked;
+            document.querySelectorAll('textarea').forEach(function(textarea) {
+                textarea.style.height = textarea.scrollHeight + 'px';
+                textarea.style.overflowY = 'hidden';
+
+                textarea.addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = this.scrollHeight + 'px';
+                })
+            });
         }
 
+        checkboxFindItem(projectId, itemId) {
+            for (const project of projectStorage) {
+                if (project._id === projectId) {
+                    for (const item of project) {
+                        if (item._id === itemId) {
+                            this.changeStatus(item)
+                        }
+                    }
+                }
+            }
+        }
         findItem(projectId, itemId, func, newValue) {
             for (const project of projectStorage) {
                 if (project._id === projectId) {
@@ -175,39 +224,23 @@ const home= (function () {
                 projectItem.classList.add('projectItem');
                 const checkboxItem = document.createElement('button');
                 checkboxItem.classList.add('checkboxItem');
-                // to be changed into proper checkbox
-                const checkboxTest = document.createElement('p');
-                checkboxTest.innerText = '✓';
-                checkboxItem.appendChild(checkboxTest);
+                checkboxItem.innerText = '✓';
+                checkboxItem.setAttribute('data-itemId', item._id);
 
                 const itemContainer = document.createElement('div');
                 itemContainer.classList.add('itemContainer');
                 itemContainer.setAttribute('data-itemId', item._id);
+                itemContainer.setAttribute('data-itemPrior', item.priority);
+                itemContainer.setAttribute('data-itemDate', item.dueDate);
                 const itemName = document.createElement('p');
                 itemName.classList.add('itemName');
                 const itemDesc = document.createElement('p');
                 itemDesc.innerText = item.description;
                 itemDesc.classList.add('itemDesc');
-
-                // createItemEditForm(itemContainer);
-
-                // const itemPrior = document.createElement('p');
-                // const itemDate = document.createElement('p');
-                // const itemStatus = document.createElement('p');
-
                 itemName.innerText = item.name;
-
-                // itemPrior.innerText = item.priority;
-                // itemDate.innerText = item.dueDate;
-                // itemStatus.innerText = item.status;
-
                 projectItem.appendChild(checkboxItem)
                 itemContainer.appendChild(itemName);
                 itemContainer.appendChild(itemDesc);
-
-                // projectItem.appendChild(itemPrior);
-                // projectItem.appendChild(itemDate);
-                // projectItem.appendChild(itemStatus);
                 projectItem.appendChild(itemContainer);
                 wrapper.appendChild(projectItem)
             }

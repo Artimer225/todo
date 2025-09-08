@@ -51,7 +51,7 @@ const logic = (function () {
     Object.assign(Project.prototype, changeName);
 
     class ProjectItem {
-        constructor(name, description = '', priority = 0, dueDate = new Date().getDate(), status = 0) {
+        constructor(name, description = '', priority = 0, dueDate = this.formatter(new Date()), status = 0) {
             this.name = name;
             this.description = description;
             this.priority = priority;
@@ -60,18 +60,22 @@ const logic = (function () {
             this._id = crypto.randomUUID();
         };
 
-        // set changePriority(num) {
-        //     this.priority = num;
-        // };
+        // formatter = new Intl.DateTimeFormat('en-US', {
+        //     year: 'numeric',
+        //     month: '2-digit',
+        //     day: '2-digit',
         //
-        // set changeDueDate(date) {
-        //     this.dueDate = date;
-        // };
-        //
-        // set changeStatus(num) {
-        //     this.status = num;
-        // }
+        // })
 
+        // format to ISO, so the value could be used in date input
+        formatter (date) {
+            return date.toISOString().split('T')[0]
+        }
+            // const year = date.getFullYear()
+            // const month = date.getMonth();
+            // const day = date.getDay();
+            // const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+            // const day = date.getDate();
     }
 
     Object.assign(ProjectItem.prototype, changeName);
