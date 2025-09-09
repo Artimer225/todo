@@ -5,11 +5,11 @@ const home= (function () {
 
     //initializing dialog in order to access it in the ProjectItemEdit
     const createItemEditForm = () => {
+        // create dialog, its form and inputs for task name and description
         const itemDialog = document.createElement('dialog');
         itemDialog.id = 'itemEditDialog';
         itemDialog.setAttribute('data-projectId', '');
         itemDialog.setAttribute('data-itemId', '');
-        // itemDialog.classList.add('itemDialog');
         const itemEditForm = document.createElement('form');
         itemEditForm.classList.add('itemEditForm');
         itemEditForm.setAttribute('method', 'dialog');
@@ -17,18 +17,42 @@ const home= (function () {
         itemEdit.classList.add('itemEdit');
         const inputName = document.createElement('textarea');
         inputName.setAttribute('name', 'itemName');
+        inputName.setAttribute('placeholder', 'Task name');
+        inputName.setAttribute('required', '');
         const inputDesc = document.createElement('textarea');
         inputDesc.setAttribute('name', 'itemDesc');
+        inputDesc.setAttribute('placeholder', 'Description');
 
         // create auxiliary inputs, such as date input and priority selector
         const itemEditAux = document.createElement('div');
         itemEditAux.classList.add('itemEditAux');
         const inputDate = document.createElement('input');
+        inputDate.id = 'dueDate';
         inputDate.setAttribute('type', 'date');
         inputDate.setAttribute('name', 'dueDate');
         inputDate.setAttribute('value', '');
         inputDate.setAttribute('min', '');
+        const inputDateLabel = document.createElement('label');
+        inputDateLabel.innerText = 'Date';
+        inputDateLabel.setAttribute('for', 'dueDate')
+        itemEditAux.appendChild(inputDateLabel)
         itemEditAux.appendChild(inputDate);
+        // create priority selector and its options
+        const selectorContainer = document.createElement('div');
+        selectorContainer.classList.add('selectorContainer');
+        const prioritySelectorLabel = document.createElement('label');
+        prioritySelectorLabel.setAttribute('for', 'prioritySelector');
+        prioritySelectorLabel.innerText = 'Priority';
+        const prioritySelector = document.createElement('select');
+        prioritySelector.id = 'prioritySelector';
+        prioritySelector.name = 'prior';
+        prioritySelector.appendChild(new Option('None', '0'));
+        prioritySelector.appendChild(new Option('Low', '1'));
+        prioritySelector.appendChild(new Option('Medium', '2'));
+        prioritySelector.appendChild(new Option('High', '3'));
+        selectorContainer.appendChild(prioritySelectorLabel);
+        selectorContainer.appendChild(prioritySelector);
+        itemEditAux.appendChild(selectorContainer);
 
         // create buttons for editForm
         const itemEditButtons = document.createElement('div');
@@ -72,14 +96,17 @@ const home= (function () {
                         itemDesc = itemContainer.lastChild.innerText;
                     }
                     const itemDate = itemContainer.dataset.itemdate;
+                    const itemPrior = itemContainer.dataset.itemprior;
                     let dialogItemName = this.dialog.querySelector('textarea[name="itemName"]');
                     let dialogItemDesc = this.dialog.querySelector('textarea[name="itemDesc"]');
                     let dialogItemDate = this.dialog.querySelector('input[name="dueDate"]');
+                    let dialogItemPrior = this.dialog.querySelector('select#prioritySelector');
                     dialogItemName.value = itemName;
                     dialogItemDesc.value = itemDesc;
                     // console.log(itemDate)
                     dialogItemDate.value = itemDate;
                     dialogItemDate.min = itemDate;
+                    dialogItemPrior.options[itemPrior].selected = true;
                     this.dialog.showModal()
                 }
             })
@@ -88,6 +115,7 @@ const home= (function () {
                 if (e.target.closest('.itemEditForm') && (e.submitter.value === 'Save')) {
                     e.preventDefault()
                     const itemInputs = Object.fromEntries(new FormData(e.target).entries());
+                    console.log(itemInputs)
                     const dialogItemName = this.dialog.querySelector('input[name="itemName"]');
                     const dialogItemDesc = this.dialog.querySelector('input[name="itemDesc"]');
                     const dialogProjectId = this.dialog.dataset.projectid;
@@ -98,6 +126,7 @@ const home= (function () {
                     let currentItemName = currentItemElement.querySelector('.itemName');
                     let currentItemDesc = currentItemElement.querySelector('.itemDesc');
                     let currentItemDate = currentItemElement.dataset.itemdate;
+                    let currentItemPrior = currentItemElement.dataset.itemprior;
                     if (!(currentItemName.innerText === itemInputs.itemName)) {
                         this.findItem(dialogProjectId, dialogItemId, this.changeName, itemInputs.itemName);
                         currentItemName.innerText = itemInputs.itemName;
@@ -110,7 +139,10 @@ const home= (function () {
                         this.findItem(dialogProjectId, dialogItemId, this.changeDate, itemInputs.dueDate)
                         currentItemElement.dataset.itemdate = itemInputs.dueDate;
                     }
-
+                    if (!(currentItemPrior === itemInputs.prior)) {
+                        this.findItem(dialogProjectId, dialogItemId, this.changePriority, itemInputs.prior);
+                        currentItemElement.dataset.itemprior = itemInputs.prior;
+                    }
                     this.dialog.close()
                 } else if (e.target.closest('.itemEditForm') && (e.submitter.value === 'Cancel')) {
                     e.preventDefault()
@@ -131,6 +163,7 @@ const home= (function () {
                     e.target.classList.toggle('pressed');
                     itemName.classList.toggle('done');
                     itemDesc.classList.toggle('done');
+                    console.log(projectStorage._items[0]._items[0]);
                 }
             })
 
@@ -219,7 +252,6 @@ const home= (function () {
             wrapper.setAttribute('data-projectId', project._id);
 
             for (const item of project) {
-
                 const projectItem = document.createElement('div');
                 projectItem.classList.add('projectItem');
                 const checkboxItem = document.createElement('button');
@@ -244,8 +276,6 @@ const home= (function () {
                 projectItem.appendChild(itemContainer);
                 wrapper.appendChild(projectItem)
             }
-
-
             projects.appendChild(wrapper);
         }
         content.appendChild(projects)

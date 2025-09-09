@@ -51,7 +51,7 @@ const logic = (function () {
     Object.assign(Project.prototype, changeName);
 
     class ProjectItem {
-        constructor(name, description = '', priority = 0, dueDate = this.formatter(new Date()), status = 0) {
+        constructor(name, description = '', priority = '0', dueDate = this.formatter(new Date()), status = 0) {
             this.name = name;
             this.description = description;
             this.priority = priority;
