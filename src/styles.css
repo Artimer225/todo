@@ -167,3 +167,15 @@ textarea[name='itemDesc'] {
     grid-column: 2 / 3;
     grid-row: 1 / 2;
 }
+
+.priorityOne {
+    color: blue;
+}
+
+.priorityTwo {
+    color: yellow;
+}
+
+.priorityThree {
+    color: red;
+}

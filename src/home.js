@@ -79,6 +79,7 @@ const home= (function () {
     }
     createItemEditForm()
 
+    // fill in dialog with item contents (name, desc, priority, date)
     class ProjectItemEdit {
         constructor() {
             this.content = document.querySelector('#content')
@@ -92,7 +93,7 @@ const home= (function () {
                     this.dialog.dataset.projectid = projectId;
                     const itemName = itemContainer.firstChild.innerText;
                     let itemDesc = '';
-                    if (itemContainer.lastChild.className === 'itemDesc') {
+                    if (itemContainer.lastChild.className.includes('itemDesc')) {
                         itemDesc = itemContainer.lastChild.innerText;
                     }
                     const itemDate = itemContainer.dataset.itemdate;
@@ -103,7 +104,6 @@ const home= (function () {
                     let dialogItemPrior = this.dialog.querySelector('select#prioritySelector');
                     dialogItemName.value = itemName;
                     dialogItemDesc.value = itemDesc;
-                    // console.log(itemDate)
                     dialogItemDate.value = itemDate;
                     dialogItemDate.min = itemDate;
                     dialogItemPrior.options[itemPrior].selected = true;
@@ -115,13 +115,12 @@ const home= (function () {
                 if (e.target.closest('.itemEditForm') && (e.submitter.value === 'Save')) {
                     e.preventDefault()
                     const itemInputs = Object.fromEntries(new FormData(e.target).entries());
-                    console.log(itemInputs)
-                    const dialogItemName = this.dialog.querySelector('input[name="itemName"]');
-                    const dialogItemDesc = this.dialog.querySelector('input[name="itemDesc"]');
+                    // const dialogItemName = this.dialog.querySelector('input[name="itemName"]');
+                    // const dialogItemDesc = this.dialog.querySelector('input[name="itemDesc"]');
                     const dialogProjectId = this.dialog.dataset.projectid;
                     const dialogItemId = this.dialog.dataset.itemid;
 
-                    const currentProjectElement = document.querySelector(`.wrapper[data-projectid="${dialogProjectId}"]`);
+                    // const currentProjectElement = document.querySelector(`.wrapper[data-projectid="${dialogProjectId}"]`);
                     const currentItemElement = document.querySelector(`.itemContainer[data-itemid="${dialogItemId}"]`);
                     let currentItemName = currentItemElement.querySelector('.itemName');
                     let currentItemDesc = currentItemElement.querySelector('.itemDesc');
@@ -140,8 +139,11 @@ const home= (function () {
                         currentItemElement.dataset.itemdate = itemInputs.dueDate;
                     }
                     if (!(currentItemPrior === itemInputs.prior)) {
-                        this.findItem(dialogProjectId, dialogItemId, this.changePriority, itemInputs.prior);
+                        this.findItem(dialogProjectId, dialogItemId, this.changePriority, itemInputs.prior, currentItemElement);
                         currentItemElement.dataset.itemprior = itemInputs.prior;
+                        // let priorityToChange = currentItemElement.closest('.projectItem').querySelector('.priorityItem')
+
+                        // createPriority(itemToEdit, itemInputs.prior);
                     }
                     this.dialog.close()
                 } else if (e.target.closest('.itemEditForm') && (e.submitter.value === 'Cancel')) {
@@ -149,10 +151,9 @@ const home= (function () {
                     this.dialog.close()
                 }
             })
-
+            // on click change status either to done or not done yet
             this.content.addEventListener('click', e => {
                 if (e.target.closest('.checkboxItem')) {
-                    console.log(projectStorage._items[0]._items[0].status);
                     const itemId = e.target.closest('.checkboxItem').dataset.itemid;
                     const projectId = e.target.closest('.wrapper').dataset.projectid;
                     const projectItem = e.target.closest('.projectItem');
@@ -163,7 +164,6 @@ const home= (function () {
                     e.target.classList.toggle('pressed');
                     itemName.classList.toggle('done');
                     itemDesc.classList.toggle('done');
-                    console.log(projectStorage._items[0]._items[0]);
                 }
             })
 
@@ -190,13 +190,15 @@ const home= (function () {
                 }
             }
         }
-        findItem(projectId, itemId, func, newValue) {
+        findItem(projectId, itemId, func, newValue, DOMItem) {
             for (const project of projectStorage) {
                 if (project._id === projectId) {
                     for (const item of project) {
                         if (item._id === itemId) {
                             // apply the needed func that changes either name, desc, priority, date, or status
-                            func(item, newValue)
+                            // DOMItem is an optional variable, used only for changePriority func, as it uses slightly
+                            // different approach, compared to other functions
+                            func(item, newValue, DOMItem)
                         }
                     }
                 }
@@ -206,14 +208,18 @@ const home= (function () {
         changeName(item, newName) {
             console.log(newName);
             item.name = newName;
-            console.log(item.name)
         };
 
         changeDesc(item, newDesc) {
             item.description = newDesc;
         };
 
-        changePriority(item, newPriority) {
+
+        // call createPriority in order to change visual representation of current priority
+        changePriority(item, newPriority, DOMItem) {
+            // console.log(DOMItem);
+            let priorityToChange = DOMItem.closest('.projectItem').querySelector('.priorityItem')
+            createPriority(priorityToChange, newPriority)
             item.priority = newPriority;
         };
 
@@ -254,23 +260,32 @@ const home= (function () {
             for (const item of project) {
                 const projectItem = document.createElement('div');
                 projectItem.classList.add('projectItem');
+                const statusItem = document.createElement('div');
+                statusItem.classList.add('statusItem');
                 const checkboxItem = document.createElement('button');
                 checkboxItem.classList.add('checkboxItem');
                 checkboxItem.innerText = '✓';
                 checkboxItem.setAttribute('data-itemId', item._id);
+                const priorityItem = document.createElement('p');
+                priorityItem.classList.add('priorityItem');
+                statusItem.appendChild(checkboxItem);
+                statusItem.appendChild(priorityItem);
 
                 const itemContainer = document.createElement('div');
                 itemContainer.classList.add('itemContainer');
                 itemContainer.setAttribute('data-itemId', item._id);
                 itemContainer.setAttribute('data-itemPrior', item.priority);
                 itemContainer.setAttribute('data-itemDate', item.dueDate);
+
+                createPriority(priorityItem, item.priority)
                 const itemName = document.createElement('p');
                 itemName.classList.add('itemName');
                 const itemDesc = document.createElement('p');
                 itemDesc.innerText = item.description;
                 itemDesc.classList.add('itemDesc');
                 itemName.innerText = item.name;
-                projectItem.appendChild(checkboxItem)
+                projectItem.appendChild(statusItem);
+                // projectItem.appendChild(checkboxItem)
                 itemContainer.appendChild(itemName);
                 itemContainer.appendChild(itemDesc);
                 projectItem.appendChild(itemContainer);
@@ -279,6 +294,15 @@ const home= (function () {
             projects.appendChild(wrapper);
         }
         content.appendChild(projects)
+    }
+
+    // used to create DOM elements and populate them with needed priority
+    const createPriority = (item, num) => {
+        let priorNum = Number(num)
+        let prior = '!';
+        const priorList = ['priorityNone', 'priorityOne', 'priorityTwo', 'priorityThree']
+        item.innerText = prior.repeat(priorNum);
+        item.classList.add(priorList[priorNum]);
     }
 
     const createLayout = () => {

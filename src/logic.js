@@ -85,7 +85,11 @@ const logic = (function () {
 
 const projectStorage = new logic.ProjectCollection();
 const testProject = new logic.Project('Very Cool Project');
-testProject.items = new logic.ProjectItem('Cook bolognese for lunch', 'I need to buy some macaroni');
+testProject.items = new logic.ProjectItem(
+    'Cook bolognese for lunch',
+    'I need to buy some macaroni',
+    '3',
+    );
 testProject.items = new logic.ProjectItem('Play some Armored Core');
 const anotherTestProject = new logic.Project('Another Good Project');
 anotherTestProject.items = new logic.ProjectItem('Beat the shit out of Dark Souls boss');
