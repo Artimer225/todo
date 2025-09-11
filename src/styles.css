@@ -70,7 +70,8 @@ nav button:hover {
     font-weight: bold;
 }
 
-.projectItem {
+.projectItem,
+.addItem {
     display: flex;
     gap: 5px;
 }
@@ -168,14 +169,31 @@ textarea[name='itemDesc'] {
     grid-row: 1 / 2;
 }
 
-.priorityOne {
+.statusItem .priorityOne {
     color: blue;
 }
 
-.priorityTwo {
+.statusItem .priorityTwo {
     color: yellow;
 }
 
-.priorityThree {
+.statusItem .priorityThree {
     color: red;
+}
+
+.addItem {
+    color: white;
+    font-size: x-large;
+    border: none;
+    background-color: transparent;
+}
+
+.addItem:hover {
+    cursor: pointer;
+    color: red;
+    transition: color 0.25s;
+}
+
+.addItem.hidden {
+    visibility: hidden;
 }

@@ -46,12 +46,19 @@ const logic = (function () {
         };
     }
 
-    // Object.assign(Project.prototype, adder);
     Object.assign(Project.prototype, remover);
     Object.assign(Project.prototype, changeName);
 
+    const formatter = (date) =>  {
+        return date.toISOString().split('T')[0]
+    }
+
+    const todayDate = () => {
+        return formatter(new Date())
+    }
+
     class ProjectItem {
-        constructor(name, description = '', priority = '0', dueDate = this.formatter(new Date()), status = 0) {
+        constructor(name, description = '', priority = '0', dueDate = todayDate(), status = 0) {
             this.name = name;
             this.description = description;
             this.priority = priority;
@@ -59,28 +66,11 @@ const logic = (function () {
             this.status = status;
             this._id = crypto.randomUUID();
         };
-
-        // formatter = new Intl.DateTimeFormat('en-US', {
-        //     year: 'numeric',
-        //     month: '2-digit',
-        //     day: '2-digit',
-        //
-        // })
-
-        // format to ISO, so the value could be used in date input
-        formatter (date) {
-            return date.toISOString().split('T')[0]
-        }
-            // const year = date.getFullYear()
-            // const month = date.getMonth();
-            // const day = date.getDay();
-            // const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-            // const day = date.getDate();
     }
 
     Object.assign(ProjectItem.prototype, changeName);
 
-    return {ProjectCollection, Project, ProjectItem}
+    return {ProjectCollection, Project, ProjectItem, todayDate}
 })();
 
 const projectStorage = new logic.ProjectCollection();
@@ -92,7 +82,7 @@ testProject.items = new logic.ProjectItem(
     );
 testProject.items = new logic.ProjectItem('Play some Armored Core');
 const anotherTestProject = new logic.Project('Another Good Project');
-anotherTestProject.items = new logic.ProjectItem('Beat the shit out of Dark Souls boss');
+anotherTestProject.items = new logic.ProjectItem('Speedrun Dark Souls 3');
 projectStorage.items = testProject;
 projectStorage.items = anotherTestProject;
 
