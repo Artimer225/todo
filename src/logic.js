@@ -1,16 +1,12 @@
 const logic = (function () {
-    const remover = {
-        removeItem(item) {
-            const removeItem = this.items.indexOf(item);
+    const delProject = {
+        removeItem(id) {
+            const project = findProject(id)
+            console.log(project)
+            const removeItem = this._items.indexOf(project);
             if (!(removeItem === -1)) {
-                this.items.splice(removeItem, 1)
+                this._items.splice(removeItem, 1)
             }
-        }
-    }
-
-    const changeName = {
-        changeName(item) {
-            this.name = name;
         }
     }
 
@@ -28,7 +24,7 @@ const logic = (function () {
         };
     }
 
-    Object.assign(ProjectCollection.prototype, remover);
+    Object.assign(ProjectCollection.prototype, delProject);
 
     class Project {
         constructor(name) {
@@ -46,11 +42,23 @@ const logic = (function () {
         };
     }
 
-    Object.assign(Project.prototype, remover);
-    Object.assign(Project.prototype, changeName);
-
     const formatter = (date) =>  {
         return date.toISOString().split('T')[0]
+    }
+
+    const fancyDate = (date) => {
+        const monthsName = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ]
+        const newDate = date.split('-');
+        let day = newDate[2]
+        if (day[0] === '0') {
+            day = day[1]
+        }
+        let month = monthsName[newDate[1]-1];
+        let year = newDate[0]
+        return day + ' ' + month + ' ' + year
     }
 
     const todayDate = () => {
@@ -61,16 +69,14 @@ const logic = (function () {
         constructor(name, description = '', priority = '0', dueDate = todayDate(), status = 0) {
             this.name = name;
             this.description = description;
-            this.priority = priority;
-            this.dueDate = dueDate;
+            this.priority = priority === '' ? '0' : priority;
+            this.dueDate = typeof(dueDate) === 'object' ? dueDate : todayDate();
             this.status = status;
             this._id = crypto.randomUUID();
         };
     }
 
-    Object.assign(ProjectItem.prototype, changeName);
-
-    return {ProjectCollection, Project, ProjectItem, todayDate}
+    return {ProjectCollection, Project, ProjectItem, todayDate, fancyDate}
 })();
 
 const projectStorage = new logic.ProjectCollection();
@@ -80,11 +86,21 @@ testProject.items = new logic.ProjectItem(
     'I need to buy some macaroni',
     '3',
     );
+
 testProject.items = new logic.ProjectItem('Play some Armored Core');
+testProject.items = new logic.ProjectItem('Damn', 'Boi', '', '')
 const anotherTestProject = new logic.Project('Another Good Project');
 anotherTestProject.items = new logic.ProjectItem('Speedrun Dark Souls 3');
 projectStorage.items = testProject;
 projectStorage.items = anotherTestProject;
 
+function findProject(projectId) {
+     for (const project of projectStorage) {
+         if (project._id === projectId) {
+             return project
+         }
+     }
+}
 
-export { logic, projectStorage };
+
+export { logic, projectStorage, findProject };
