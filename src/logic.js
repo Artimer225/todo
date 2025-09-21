@@ -12,12 +12,20 @@ const logic = (function () {
 
     class ProjectCollection {
         constructor() {
-            this._items = [];
+            this._items = []
         };
 
         set items(item) {
             this._items.push(item)
-        }
+        };
+
+        applyData(json) {
+            Object.assign(this, json)
+        };
+
+        clear() {
+            this._items = []
+        };
 
         [Symbol.iterator]() {
             return this._items[Symbol.iterator]();
@@ -35,6 +43,10 @@ const logic = (function () {
 
         set items(item) {
             this._items.push(item)
+        }
+
+        applyData(json) {
+            Object.assign(this, json)
         }
 
         [Symbol.iterator]() {
@@ -66,7 +78,7 @@ const logic = (function () {
     }
 
     class ProjectItem {
-        constructor(name, description = '', priority = '0', dueDate = todayDate(), status = 0) {
+        constructor(name = '', description = '', priority = '0', dueDate = todayDate(), status = 0) {
             this.name = name;
             this.description = description;
             this.priority = priority === '' ? '0' : priority;
@@ -74,26 +86,70 @@ const logic = (function () {
             this.status = status;
             this._id = crypto.randomUUID();
         };
+
+        applyData(json) {
+            Object.assign(this, json)
+        }
     }
 
     return {ProjectCollection, Project, ProjectItem, todayDate, fancyDate}
 })();
 
-const projectStorage = new logic.ProjectCollection();
-const testProject = new logic.Project('Very Cool Project');
-testProject.items = new logic.ProjectItem(
-    'Cook bolognese for lunch',
-    'I need to buy some macaroni',
-    '3',
-    );
+// parses projectStorage from JSON (the one from localStorage) to a functional object for further use
+const parseFromJSON = (json) => {
+    const parsedJSON = JSON.parse(json)
+    const testCollection = new logic.ProjectCollection()
+    testCollection.applyData(parsedJSON)
+    for (const item of testCollection._items) {
+        let testProject = new logic.Project()
+        testProject.applyData(item)
+        let itemIndex = testCollection._items.indexOf(item)
+        testCollection._items.splice(itemIndex, 1, testProject)
+        for (const task of testProject._items) {
+            let testTask = new logic.ProjectItem();
+            testTask.applyData(task)
+            let taskIndex = testProject._items.indexOf(task);
+            testProject._items.splice(taskIndex, 1, testTask)
+        }
+    }
+    return testCollection
+}
+let projectStorage = new logic.ProjectCollection();
+/*
+projectStorageCheck checks whether there is projectStorage key in the localStorage
+if there is, then projectStorage is assigned to the retrieved JSON from localStorage
+otherwise, projectStorageInit() runs, setting up a basic example project
+*/
+const projectStorageCheck = () => {
+    if (localStorage.getItem('projectStorage')) {
+        const retrievedProjectStorage = localStorage.getItem('projectStorage');
+        projectStorage = parseFromJSON(retrievedProjectStorage)
+        // console.log(projectStorage)
+    } else {
+        projectStorageInit()
+    }
+}
+const projectStorageInit = () => {
+    const testProject = new logic.Project('Cleaning the house');
+    testProject.items = new logic.ProjectItem(
+        'Wash the dishes',
+        'Also, need to buy some gel for dishes',
+        '3',
+        );
 
-testProject.items = new logic.ProjectItem('Play some Armored Core');
-testProject.items = new logic.ProjectItem('Damn', 'Boi', '', '')
-const anotherTestProject = new logic.Project('Another Good Project');
-anotherTestProject.items = new logic.ProjectItem('Speedrun Dark Souls 3');
-projectStorage.items = testProject;
-projectStorage.items = anotherTestProject;
+    testProject.items = new logic.ProjectItem('Buy some towels');
+    testProject.items = new logic.ProjectItem(
+        'Move all my stuff to another table',
+        "Do it before the 9 pm, otherwise I won't have much time for this"
+        );
+    projectStorage.items = testProject;
 
+    localStorage.setItem('projectStorage', JSON.stringify(projectStorage))
+}
+
+const projectStorageSave = () => {
+    localStorage.setItem('projectStorage', JSON.stringify(projectStorage))
+}
 function findProject(projectId) {
      for (const project of projectStorage) {
          if (project._id === projectId) {
@@ -102,5 +158,7 @@ function findProject(projectId) {
      }
 }
 
+// this function makes sure that projectStorage filled with up-to-date data
+projectStorageCheck()
 
-export { logic, projectStorage, findProject };
+export { logic, projectStorage, findProject, projectStorageCheck, projectStorageSave };

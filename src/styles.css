@@ -95,8 +95,6 @@ nav button:hover {
 
 .checkboxItem.pressed {
     color: white;
-    /*background-color: violet;*/
-    /*transition: color .25s;*/
 }
 
 .projectItem .itemName {
@@ -134,7 +132,6 @@ nav button:hover {
 
 .itemEdit {
     display: grid;
-    /*grid-template-columns: 1fr 0.2fr;*/
     row-gap: 5px;
 }
 
@@ -201,13 +198,14 @@ textarea[name='itemDesc'] {
 .projectContainer {
     display: grid;
     grid-template-columns: 1fr 40px;
+    align-items: center;
     font-size: x-large;
     color: white;
-    /*border: 1px solid red;*/
     border-radius: 6px;
 }
 
-.projectContainer:hover{
+.projectContainer:hover,
+.addProject:hover {
     cursor: pointer;
     background-color: gray;
     transition:
@@ -249,4 +247,16 @@ textarea[name='itemDesc'] {
     color: #000000;
     text-decoration: none;
     padding: 10px;
+}
+
+.addProject {
+    display: grid;
+    grid-template-columns: 20px 1fr;
+    align-items: center;
+    justify-items: start;
+    font-size: x-large;
+    color: white;
+    background-color: #6b6b6b;
+    border: 1px solid transparent;
+    border-radius: 6px;
 }
