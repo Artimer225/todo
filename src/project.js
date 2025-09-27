@@ -1,18 +1,11 @@
 import {projectStorage, logic, findProject, projectStorageSave} from './logic.js';
-import { home } from './home';
 const project= (function () {
     const content = document.querySelector('#content');
-    const editDialog = document.querySelector('#editDialog')
+    const editDialog = document.querySelector('#editDialog');
+    const deleteDialog = document.querySelector('#deleteDialog');
+
     // if flag is true, append label
     const appendPrioritySelector = (item, flag = true) => {
-        const selectorContainer = document.createElement('div');
-        selectorContainer.classList.add('selectorContainer');
-        if (flag) {
-            const prioritySelectorLabel = document.createElement('label');
-            prioritySelectorLabel.setAttribute('for', 'prioritySelector');
-            prioritySelectorLabel.innerText = 'Priority';
-            selectorContainer.appendChild(prioritySelectorLabel);
-        }
         const prioritySelector = document.createElement('select');
         prioritySelector.id = 'prioritySelector';
         prioritySelector.name = 'prior';
@@ -20,19 +13,27 @@ const project= (function () {
         prioritySelector.appendChild(new Option('Low', '1'));
         prioritySelector.appendChild(new Option('Medium', '2'));
         prioritySelector.appendChild(new Option('High', '3'));
-        selectorContainer.appendChild(prioritySelector);
-        item.appendChild(selectorContainer)
+        if (flag) {
+            const prioritySelectorLabel = document.createElement('label');
+            prioritySelectorLabel.setAttribute('for', 'prioritySelector');
+            prioritySelectorLabel.innerText = 'Priority';
+            item.appendChild(prioritySelectorLabel);
+        }
+        item.appendChild(prioritySelector)
     }
 
-    const appendFormButtons = (item, className, saveButtonValue= 'Save') => {
+    const appendFormButtons = (item, className, saveButtonValue= 'Save', disabled = false) => {
         const formButtons = document.createElement('div');
         formButtons.classList.add(className);
         const cancelButton = document.createElement('input');
+        cancelButton.className = 'cancelButton';
         cancelButton.value = 'Cancel';
         cancelButton.type = 'button';
         const saveButton = document.createElement('input');
+        saveButton.className = 'confirmButton';
         saveButton.value = saveButtonValue;
         saveButton.type = 'submit';
+        saveButton.disabled = disabled;
         formButtons.appendChild(cancelButton);
         formButtons.appendChild(saveButton);
         item.appendChild(formButtons)
@@ -40,12 +41,24 @@ const project= (function () {
     // initialize dialog in order to access it in the ProjectEventListener
     const createItemEditForm = () => {
         // create dialog, its form and inputs for task name and description
-        console.log('creating ItemEditForm')
         editDialog.setAttribute('data-projectId', '');
         editDialog.setAttribute('data-itemId', '');
         const itemEditForm = document.createElement('form');
         itemEditForm.classList.add('itemEditForm');
         itemEditForm.method = 'dialog'
+        const itemUpperPanel = document.createElement('div');
+        itemUpperPanel.className = 'itemUpperPanel';
+        const itemTitle = document.createElement('p');
+        itemTitle.className = 'itemTitle'
+        itemTitle.innerText = 'Edit task';
+        const itemDeleteButton = document.createElement('button');
+        itemDeleteButton.classList.add('itemButton', 'itemDeleteButton');
+        const itemCloseButton = document.createElement('button');
+        itemCloseButton.classList.add('itemButton', 'itemCloseButton');
+        itemUpperPanel.appendChild(itemTitle);
+        itemUpperPanel.appendChild(itemDeleteButton);
+        itemUpperPanel.appendChild(itemCloseButton);
+
         const itemEdit = document.createElement('div');
         itemEdit.classList.add('itemEdit');
         const inputName = document.createElement('textarea');
@@ -59,20 +72,23 @@ const project= (function () {
         // create auxiliary inputs, such as date input and priority selector
         const itemEditAux = document.createElement('div');
         itemEditAux.classList.add('itemEditAux');
+        const inputDateLabel = document.createElement('label');
+        inputDateLabel.innerText = 'Date';
+        inputDateLabel.setAttribute('for', 'dueDate')
         const inputDate = document.createElement('input');
         inputDate.id = 'dueDate';
         inputDate.type = 'date';
         inputDate.name = 'dueDate';
+        inputDate.className = 'itemDateInput';
         inputDate.value = '';
         inputDate.min = '';
-        const inputDateLabel = document.createElement('label');
-        inputDateLabel.innerText = 'Date';
-        inputDateLabel.for = 'dueDate';
+        // inputDateLabel.appendChild(inputDate)
         itemEditAux.appendChild(inputDateLabel)
         itemEditAux.appendChild(inputDate);
         appendPrioritySelector(itemEditAux)
 
         editDialog.appendChild(itemEditForm);
+        itemEditForm.appendChild(itemUpperPanel)
         itemEditForm.appendChild(itemEdit);
         itemEdit.appendChild(inputName);
         itemEdit.appendChild(inputDesc);
@@ -80,6 +96,35 @@ const project= (function () {
         itemEditForm.appendChild(itemEditAux);
 
         content.appendChild(editDialog);
+    }
+
+    const createDeleteDialog = () => {
+        deleteDialog.dataset.itemid = '';
+        deleteDialog.dataset.projectid = '';
+        const titleDialog = document.createElement('p');
+        titleDialog.className = 'titleDialog';
+
+        titleDialog.innerText = 'Delete task?';
+        const bodyDialog = document.createElement('p');
+        bodyDialog.className = 'bodyDialog';
+
+        const deleteButtons = document.createElement('div');
+        deleteButtons.className = 'deleteButtons'
+        const cancelButton = document.createElement('button');
+        cancelButton.innerText = 'Cancel';
+        cancelButton.className = 'cancelButton';
+
+        const deleteButton = document.createElement('button');
+        deleteButton.innerText = 'Delete';
+        deleteButton.className = 'confirmButton';
+        deleteButton.id = 'deleteButton'
+        deleteButtons.appendChild(cancelButton);
+        deleteButtons.appendChild(deleteButton);
+
+        deleteDialog.appendChild(titleDialog)
+        deleteDialog.appendChild(bodyDialog)
+        deleteDialog.appendChild(deleteButtons)
+        content.appendChild(deleteDialog)
     }
 
     const checkboxFindItem = (projectId, itemId) => {
@@ -153,7 +198,7 @@ const project= (function () {
         const itemNameInput = document.createElement('input');
         itemNameInput.classList.add('itemNameInput');
         itemNameInput.placeholder = 'Task name';
-        itemNameInput.required = true;
+        // itemNameInput.required = true;
         itemNameInput.name = 'itemName';
         const itemDescInput = document.createElement('input');
         itemDescInput.classList.add('itemDescInput');
@@ -167,15 +212,15 @@ const project= (function () {
         const itemDateInput = document.createElement('input');
         itemDateInput.type = 'date';
         itemDateInput.name = 'dueDate';
+        itemDateInput.className = 'itemDateInput'
         itemDateInput.value = '';
         itemDateInput.min = logic.todayDate();
         itemAux.appendChild(itemDateInput);
         appendPrioritySelector(itemAux, false);
 
-
         addForm.appendChild(itemMain);
         addForm.appendChild(itemAux);
-        appendFormButtons(addForm, 'itemButtons', 'Save')
+        appendFormButtons(addForm, 'itemButtons', 'Add task', true)
         return addForm
     };
 
@@ -200,11 +245,32 @@ const project= (function () {
             dialogItemDate.min = itemDate;
             dialogItemPrior.options[itemPrior].selected = true;
             editDialog.showModal()
+
+                document.querySelectorAll('textarea').forEach(function(textarea) {
+                textarea.style.height = textarea.scrollHeight + 'px';
+                textarea.style.overflowY = 'hidden';
+
+                textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = this.scrollHeight + 'px';
+                })
+            });
+
         }
     }
 
     const checkAddFormStatus = () => {
         return document.querySelector('#addForm')
+    }
+
+    //toggle disabled state if name input has length less than one
+    const checkNameInputLength = () => {
+        if (document.querySelector('#addForm')) {
+            const nameInput = document.querySelector('.itemNameInput');
+            const addForm = nameInput.closest('#addForm');
+            const confirmButton = addForm.querySelector('.confirmButton')
+            confirmButton.disabled = !nameInput.value.length;
+        }
     }
 
     const handleAddTaskClick = (e) => {
@@ -241,10 +307,40 @@ const project= (function () {
         }
     }
 
+    const handleDeleteButtonClick = (e) => {
+        if (e.target.closest('.itemDeleteButton') && e.target.parentElement.className === 'itemUpperPanel') {
+            e.preventDefault()
+            const itemName = e.target.closest('.itemEditForm')
+                .querySelector('textarea[name="itemName"]').value
+            const bodyDialog = document.querySelector('.bodyDialog')
+            bodyDialog.innerHTML = `The <b>${itemName}</b> task will be permanently deleted.`;
+            deleteDialog.dataset.itemid = editDialog.dataset.itemid;
+            deleteDialog.dataset.projectid = editDialog.dataset.projectid
+            deleteDialog.showModal()
+        }
+        if (e.target.value === 'delete' && e.target.parentElement.className === 'projectItem') {
+            e.preventDefault()
+            const item = e.target.previousSibling;
+            const itemId = item.dataset.itemid;
+            const projectId = item.closest('.wrapper').dataset.projectid
+            const itemName = item.querySelector('.itemName').innerText;
+            const bodyDialog = document.querySelector('.bodyDialog')
+            bodyDialog.innerHTML = `The <b>${itemName}</b> task will be permanently deleted.`;
+            deleteDialog.dataset.itemid = itemId;
+            deleteDialog.dataset.projectid = projectId
+            deleteDialog.showModal()
+        }
+    }
+
     const handleDialogCancelClick = (e) => {
-        if (e.target.closest('.itemEditForm') && (e.target.value === 'Cancel')) {
+        if ((e.target.closest('.itemEditForm') && (e.target.value === 'Cancel'))
+            || (e.target.closest('.itemCloseButton'))) {
             e.preventDefault()
             editDialog.close()
+        }
+        if (e.target.closest('.cancelButton') && e.target.parentElement.className === 'deleteButtons') {
+            e.preventDefault()
+            deleteDialog.close()
         }
     }
 
@@ -259,16 +355,17 @@ const project= (function () {
     }
 
     const handleDeleteItemClick = (e) => {
-        if (e.target.value === 'delete') {
-            const project = e.target.closest('.wrapper');
-            console.log(project)
-            console.log(project.dataset.projectid)
-            const projectId = project.dataset.projectid;
-            const item = e.target.closest('.projectItem')
-            const itemId = item.querySelector('.itemContainer').dataset.itemid
+        // confirm delete in a pop-up dialog
+        if (e.target.closest('#deleteButton') && e.target.parentElement.className === 'deleteButtons') {
+            const itemId = deleteDialog.dataset.itemid
+            const projectId = deleteDialog.dataset.projectid
+            const item = document.querySelector(`.itemContainer[data-itemid="${itemId}"]`)
+                .closest('.projectItem')
             deleteItem(projectId, itemId)
             item.remove()
             projectStorageSave()
+            deleteDialog.close();
+            editDialog.close();
         }
     }
 
@@ -311,13 +408,12 @@ const project= (function () {
     }
 
     const handleCreateItemSubmit = (e) => {
-        if (e.target.closest('#addForm') && (e.submitter.value === 'Save')) {
+        if (e.target.closest('#addForm') && (e.submitter.value === 'Add task')) {
             e.preventDefault();
             const i = Object.fromEntries(new FormData(e.target).entries())
             const currentProject = e.target.closest('.wrapper');
             const currentProjectId = document.querySelector('.wrapper').dataset.projectid
             const currentProjectObj = findProject(currentProjectId)
-            console.log(i)
             currentProjectObj.items = new logic.ProjectItem(i.itemName, i.itemDesc, i.prior, i.dueDate);
             // get newly created item
             const itemReference = currentProjectObj._items.at(-1);
@@ -335,8 +431,10 @@ const project= (function () {
     const initEventListeners = () => {
         content.addEventListener('click', handleItemContainerClick);
         content.addEventListener('click', handleAddTaskClick)
+        content.addEventListener('input', checkNameInputLength)
         content.addEventListener('click', handleCheckboxClick);
         content.addEventListener('click', handleDialogCancelClick);
+        content.addEventListener('click', handleDeleteButtonClick);
         content.addEventListener('click', handleAddFormCancelClick);
         content.addEventListener('click', handleDeleteItemClick);
         content.addEventListener('submit', handleEditItemSubmit);
@@ -347,6 +445,7 @@ const project= (function () {
         content.removeEventListener('click', handleItemContainerClick)
         content.removeEventListener('click', handleCheckboxClick)
         content.removeEventListener('click', handleAddTaskClick)
+        content.removeEventListener('click', checkNameInputLength)
         content.removeEventListener('click', handleDialogCancelClick)
         content.removeEventListener('click', handleAddFormCancelClick)
         content.removeEventListener('click', handleDeleteItemClick)
@@ -367,7 +466,6 @@ const project= (function () {
         wrapper.classList.add('wrapper');
         wrapper.dataset.projectid = project._id;
         for (const item of project) {
-            console.log(item)
             let newItem = createItem(item);
             wrapper.appendChild(newItem)
         }
@@ -437,9 +535,8 @@ const project= (function () {
 
     const appendDelButton = (item) => {
         const delButton = document.createElement('button');
-        delButton.className = 'delButton';
+        delButton.classList.add('itemButton', 'itemDeleteButton');
         delButton.value = 'delete';
-        delButton.innerText = 'DEL';
         item.appendChild(delButton);
     }
 
@@ -469,13 +566,14 @@ const project= (function () {
     }
 
     const initPage = (project) => {
+        createItemEditForm()
+        createDeleteDialog()
         initEventListeners()
         createProject(project);
     }
 
-    return { appendFormButtons, appendAddButton, clearPage, createItemEditForm, initPage }
+    return { appendFormButtons, appendAddButton, clearPage, createItemEditForm, createDeleteDialog, initPage }
 })();
-
 
 
 export { project };

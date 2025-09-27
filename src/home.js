@@ -27,7 +27,6 @@ const home = (function () {
         content.appendChild(editDialog)
     }
 
-    // TRYING MY BEST TO REFACTOR ALL THIS CLASS SHIT
     const handleAddItemClick = (e) => {
         if (e.target.closest('.addItem') && !!checkAddFormStatus() === false) {
             const currentAddItem = e.target;
@@ -51,7 +50,7 @@ const home = (function () {
         if (e.target.closest('.projectName')) {
             const projectId = e.target.closest('.projectContainer').dataset.projectid
             clearPage()
-            project.createItemEditForm()
+            // project.createItemEditForm()
             const theProject = findProject(projectId);
             project.initPage(theProject)
         }
@@ -126,8 +125,7 @@ const home = (function () {
             projectStorageSave()
         }
     }
-
-
+    
     const checkAddFormStatus = () => {
         return document.querySelector('#addForm')
     }
@@ -200,8 +198,7 @@ const home = (function () {
         const dropdown = document.createElement('div');
         dropdown.className = 'dropdown';
         const dropdownButton = document.createElement('button');
-        dropdownButton.className = 'dropdownButton';
-        dropdownButton.innerText = '...'
+        dropdownButton.classList.add('dropdownButton', 'itemButton');
         const dropdownOptions = document.createElement('div');
         dropdownOptions.className = 'dropdownOptions';
         const editOption = document.createElement('button');
