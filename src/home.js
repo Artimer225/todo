@@ -3,15 +3,18 @@ import {projectStorage, findProject, logic, projectStorageSave} from './logic';
 import { project } from './project.js'
 const home = (function () {
     const content = document.querySelector('#content');
-    const editDialog = document.querySelector('#editDialog')
+    const editProjectDialog = document.querySelector('#editProjectDialog')
 
     const createEditProjectName = () => {
-        editDialog.setAttribute('data-projectId', '');
+        editProjectDialog.setAttribute('data-projectId', '');
         const dialogForm = document.createElement('form');
         dialogForm.classList.add('dialogForm');
         dialogForm.method = 'dialog'
         const projectEdit = document.createElement('div');
         projectEdit.classList.add('itemEdit');
+        const titleDialog = document.createElement('p');
+        titleDialog.className = 'titleDialog';
+        titleDialog.innerText = 'Edit'
         const projectNameLabel = document.createElement('label');
         projectNameLabel.innerText = 'Name';
         projectNameLabel.setAttribute('for', 'projectName');
@@ -19,12 +22,13 @@ const home = (function () {
         projectName.name = 'projectName';
         projectName.id = 'projectName'
         projectName.required = true;
-        editDialog.appendChild(dialogForm);
+        editProjectDialog.appendChild(dialogForm);
         dialogForm.appendChild(projectEdit);
+        projectEdit.appendChild(titleDialog)
         projectEdit.appendChild(projectNameLabel);
         projectEdit.appendChild(projectName);
         project.appendFormButtons(dialogForm, 'dialogFormButtons')
-        content.appendChild(editDialog)
+        content.appendChild(editProjectDialog)
     }
 
     const handleAddItemClick = (e) => {
@@ -60,16 +64,25 @@ const home = (function () {
                 if (e.target.closest('.editOption')) {
                 const projectId = e.target.closest('.projectContainer').dataset.projectid;
                 const projectName = e.target.closest('.projectContainer').querySelector('.projectName').innerText;
-                let dialogProjectName = editDialog.querySelector('input[name="projectName"]');
+                let dialogProjectName = editProjectDialog.querySelector('input[name="projectName"]');
                 dialogProjectName.value = projectName;
-                editDialog.dataset.projectid = projectId
-                editDialog.showModal()
+                editProjectDialog.dataset.projectid = projectId
+                editProjectDialog.showModal()
             }
         }
 
+    const checkProjectNameInputLength = () => {
+        if (document.querySelector('#addForm')) {
+            const nameInput = document.querySelector('.projectNameInput');
+            const addForm = nameInput.closest('#addForm');
+            const confirmButton = addForm.querySelector('.confirmButton')
+            confirmButton.disabled = !nameInput.value.length;
+        }
+    }
+
     const handleCancelDialogClick = (e) => {
         if (e.target.value === 'Cancel' && e.target.closest('.dialogFormButtons')) {
-            editDialog.close()
+            editProjectDialog.close()
         }
     }
 
@@ -96,7 +109,7 @@ const home = (function () {
         if (e.target.closest('.dialogForm') && (e.submitter.value === 'Save')) {
             e.preventDefault()
             const itemInputs = Object.fromEntries(new FormData(e.target).entries());
-            const dialogProjectId = editDialog.dataset.projectid;
+            const dialogProjectId = editProjectDialog.dataset.projectid;
             const currentProject = document.querySelector(
                 `.projectContainer[data-projectid="${dialogProjectId}"]`);
             const currentProjectName = currentProject.querySelector('.projectName');
@@ -104,7 +117,7 @@ const home = (function () {
             const projectToEdit = findProject(dialogProjectId);
             projectToEdit.name = itemInputs.projectName;
             // console.log(projectStorage)
-            editDialog.close()
+            editProjectDialog.close()
             projectStorageSave()
         }
     }
@@ -143,7 +156,7 @@ const home = (function () {
         projectMain.append(projectNameInput);
 
         addForm.appendChild(projectMain);
-        project.appendFormButtons(addForm, 'projectButtons', 'Add')
+        project.appendFormButtons(addForm, 'projectButtons', 'Add', true)
         return addForm
     }
 
@@ -152,6 +165,7 @@ const home = (function () {
         content.addEventListener('click', handleProjectContainerClick, )
         content.addEventListener('click', handleEditOptionClick)
         content.addEventListener('click', handleCancelDialogClick)
+        content.addEventListener('input', checkProjectNameInputLength)
         content.addEventListener('click', handleCancelFormClick)
         content.addEventListener('click', handleDeleteClick)
         content.addEventListener('submit', handleSubmitDialog)
@@ -161,6 +175,7 @@ const home = (function () {
     const clearEventListeners = () => {
         content.removeEventListener('click', handleProjectContainerClick)
         content.removeEventListener('click', handleEditOptionClick)
+        content.removeEventListener('input', checkProjectNameInputLength)
         content.removeEventListener('click', handleCancelDialogClick)
         content.removeEventListener('click', handleCancelFormClick)
         content.removeEventListener('click', handleDeleteClick)
@@ -173,8 +188,8 @@ const home = (function () {
         while (content.hasChildNodes()) {
             content.removeChild(content.lastChild);
         }
-        while (editDialog.hasChildNodes()) {
-            editDialog.removeChild(editDialog.lastChild)
+        while (editProjectDialog.hasChildNodes()) {
+            editProjectDialog.removeChild(editProjectDialog.lastChild)
         }
     }
 

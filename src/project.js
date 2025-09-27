@@ -338,7 +338,7 @@ const project= (function () {
             e.preventDefault()
             editDialog.close()
         }
-        if (e.target.closest('.cancelButton') && e.target.parentElement.className === 'deleteButtons') {
+        if (e.target.closest('.cancelButton') && e.target.parentElement.className === 'deleteButtons'){
             e.preventDefault()
             deleteDialog.close()
         }
@@ -365,6 +365,7 @@ const project= (function () {
             item.remove()
             projectStorageSave()
             deleteDialog.close();
+            deleteDialog.remove()
             editDialog.close();
         }
     }
@@ -562,6 +563,9 @@ const project= (function () {
         }
         while (editDialog.hasChildNodes()) {
             editDialog.removeChild(editDialog.lastChild)
+        }
+        while (deleteDialog.hasChildNodes()) {
+            deleteDialog.removeChild(deleteDialog.lastChild)
         }
     }
 
