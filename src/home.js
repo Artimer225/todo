@@ -1,277 +1,301 @@
-import './styles.css';
-import {projectStorage, findProject, logic, projectStorageSave} from './logic';
-import { project } from './project.js'
+import "./styles.css";
+import {
+  projectStorage,
+  findProject,
+  logic,
+  projectStorageSave,
+} from "./logic";
+import { project } from "./project.js";
 const home = (function () {
-    const content = document.querySelector('#content');
-    const editProjectDialog = document.querySelector('#editProjectDialog')
-    const deleteDialog = document.querySelector('#deleteDialog')
+  const content = document.querySelector("#content");
+  const editProjectDialog = document.querySelector("#editProjectDialog");
+  const deleteDialog = document.querySelector("#deleteDialog");
 
-    const createEditProjectName = () => {
-        editProjectDialog.setAttribute('data-projectId', '');
-        const dialogForm = document.createElement('form');
-        dialogForm.classList.add('dialogForm');
-        dialogForm.method = 'dialog'
-        const projectEdit = document.createElement('div');
-        projectEdit.classList.add('itemEdit');
-        const titleDialog = document.createElement('p');
-        titleDialog.className = 'titleDialog';
-        titleDialog.innerText = 'Edit'
-        const projectNameLabel = document.createElement('label');
-        projectNameLabel.innerText = 'Name';
-        projectNameLabel.setAttribute('for', 'projectName');
-        const projectName = document.createElement('input');
-        projectName.name = 'projectName';
-        projectName.id = 'projectName'
-        projectName.required = true;
-        editProjectDialog.appendChild(dialogForm);
-        dialogForm.appendChild(projectEdit);
-        projectEdit.appendChild(titleDialog)
-        projectEdit.appendChild(projectNameLabel);
-        projectEdit.appendChild(projectName);
-        project.appendFormButtons(dialogForm, 'dialogFormButtons')
-        content.appendChild(editProjectDialog)
+  const createEditProjectName = () => {
+    editProjectDialog.setAttribute("data-projectId", "");
+    const dialogForm = document.createElement("form");
+    dialogForm.classList.add("dialogForm");
+    dialogForm.method = "dialog";
+    const projectEdit = document.createElement("div");
+    projectEdit.classList.add("itemEdit");
+    const titleDialog = document.createElement("p");
+    titleDialog.className = "titleDialog";
+    titleDialog.innerText = "Edit";
+    const projectNameLabel = document.createElement("label");
+    projectNameLabel.innerText = "Name";
+    projectNameLabel.setAttribute("for", "projectName");
+    const projectName = document.createElement("input");
+    projectName.name = "projectName";
+    projectName.id = "projectName";
+    projectName.required = true;
+    editProjectDialog.appendChild(dialogForm);
+    dialogForm.appendChild(projectEdit);
+    projectEdit.appendChild(titleDialog);
+    projectEdit.appendChild(projectNameLabel);
+    projectEdit.appendChild(projectName);
+    project.appendFormButtons(dialogForm, "dialogFormButtons");
+    content.appendChild(editProjectDialog);
+  };
+
+  const handleAddItemClick = (e) => {
+    if (e.target.closest(".addItem") && !!checkAddFormStatus() === false) {
+      const currentAddItem = e.target;
+      const addForm = createAddForm();
+      currentAddItem.classList.toggle("hidden");
+      currentAddItem.insertAdjacentElement("beforebegin", addForm);
+    } else if (
+      e.target.closest(".addItem") &&
+      !!checkAddFormStatus() === true
+    ) {
+      const previousAddForm = document.querySelector("#addForm");
+      const previousAddButton = previousAddForm
+        .closest(".projects")
+        .querySelector(".addItem");
+      previousAddForm.remove();
+      // TOGGLE THE PREVIOUSADDBUTTON CLASS, SO IT WOULD BE VISIBLE ONCE AGAIN
+      previousAddButton.classList.toggle("hidden");
+      const currentAddItem = e.target;
+      const addForm = createAddForm();
+      currentAddItem.classList.toggle("hidden");
+      currentAddItem.insertAdjacentElement("beforebegin", addForm);
     }
+  };
 
-    const handleAddItemClick = (e) => {
-        if (e.target.closest('.addItem') && !!checkAddFormStatus() === false) {
-            const currentAddItem = e.target;
-            const addForm = createAddForm();
-            currentAddItem.classList.toggle('hidden');
-            currentAddItem.insertAdjacentElement('beforebegin', addForm)
-        } else if (e.target.closest('.addItem') && !!checkAddFormStatus() === true) {
-            const previousAddForm = document.querySelector('#addForm');
-            const previousAddButton = previousAddForm.closest('.projects').querySelector('.addItem')
-            previousAddForm.remove()
-            // TOGGLE THE PREVIOUSADDBUTTON CLASS, SO IT WOULD BE VISIBLE ONCE AGAIN
-            previousAddButton.classList.toggle('hidden');
-            const currentAddItem = e.target;
-            const addForm = createAddForm();
-            currentAddItem.classList.toggle('hidden');
-            currentAddItem.insertAdjacentElement('beforebegin', addForm)
-        }
+  const handleProjectContainerClick = (e) => {
+    if (e.target.closest(".projectName")) {
+      const projectId = e.target.closest(".projectContainer").dataset.projectid;
+      clearPage();
+      const theProject = findProject(projectId);
+      project.initPage(theProject);
     }
+  };
 
-    const handleProjectContainerClick = (e) => {
-        if (e.target.closest('.projectName')) {
-            const projectId = e.target.closest('.projectContainer').dataset.projectid
-            clearPage()
-            const theProject = findProject(projectId);
-            project.initPage(theProject)
-        }
+  const handleEditOptionClick = (e) => {
+    if (e.target.closest(".editOption")) {
+      const projectId = e.target.closest(".projectContainer").dataset.projectid;
+      const projectName = e.target
+        .closest(".projectContainer")
+        .querySelector(".projectName").innerText;
+      let dialogProjectName = editProjectDialog.querySelector(
+        'input[name="projectName"]',
+      );
+      dialogProjectName.value = projectName;
+      editProjectDialog.dataset.projectid = projectId;
+      editProjectDialog.showModal();
     }
+  };
 
-    const handleEditOptionClick = (e) => {
-                if (e.target.closest('.editOption')) {
-                const projectId = e.target.closest('.projectContainer').dataset.projectid;
-                const projectName = e.target.closest('.projectContainer').querySelector('.projectName').innerText;
-                let dialogProjectName = editProjectDialog.querySelector('input[name="projectName"]');
-                dialogProjectName.value = projectName;
-                editProjectDialog.dataset.projectid = projectId
-                editProjectDialog.showModal()
-            }
-        }
-
-    const checkProjectNameInputLength = () => {
-        if (document.querySelector('#addForm')) {
-            const nameInput = document.querySelector('.projectNameInput');
-            const addForm = nameInput.closest('#addForm');
-            const confirmButton = addForm.querySelector('.confirmButton')
-            confirmButton.disabled = !nameInput.value.length;
-        }
+  const checkProjectNameInputLength = () => {
+    if (document.querySelector("#addForm")) {
+      const nameInput = document.querySelector(".projectNameInput");
+      const addForm = nameInput.closest("#addForm");
+      const confirmButton = addForm.querySelector(".confirmButton");
+      confirmButton.disabled = !nameInput.value.length;
     }
+  };
 
-    const handleCancelDialogClick = (e) => {
-        if (e.target.value === 'Cancel' && e.target.closest('.dialogFormButtons')) {
-            editProjectDialog.close()
-        }
-        if (e.target.closest('.cancelButton') && e.target.parentElement.className === 'deleteButtons'){
-            e.preventDefault()
-            deleteDialog.close()
-        }
+  const handleCancelDialogClick = (e) => {
+    if (e.target.value === "Cancel" && e.target.closest(".dialogFormButtons")) {
+      editProjectDialog.close();
     }
-
-    const handleCancelFormClick = (e) => {
-        if (e.target.value === 'Cancel' && e.target.closest('.projectButtons')) {
-            e.preventDefault();
-            const currentProjects = e.target.closest('.projects');
-            currentProjects.querySelector('.addItem').classList.toggle('hidden');
-            const addForm = document.querySelector('#addForm');
-            addForm.remove()
-        }
+    if (
+      e.target.closest(".cancelButton") &&
+      e.target.parentElement.className === "deleteButtons"
+    ) {
+      e.preventDefault();
+      deleteDialog.close();
     }
+  };
 
-    const handleDeleteClick = (e) => {
-        if (e.target.closest('.deleteOption')) {
-            const currentProject = e.target.closest('.projectContainer');
-            const projectName = currentProject.querySelector('.projectName').innerText;
-            const bodyDialog = document.querySelector('.bodyDialog')
-            bodyDialog.innerHTML = `The <b>${projectName}</b> and all of its tasks will be permanently deleted.`;
-            deleteDialog.dataset.projectid = currentProject.dataset.projectid
-            deleteDialog.showModal()
-        }
+  const handleCancelFormClick = (e) => {
+    if (e.target.value === "Cancel" && e.target.closest(".projectButtons")) {
+      e.preventDefault();
+      const currentProjects = e.target.closest(".projects");
+      currentProjects.querySelector(".addItem").classList.toggle("hidden");
+      const addForm = document.querySelector("#addForm");
+      addForm.remove();
     }
+  };
 
-    const handleDeleteItemClick = (e) => {
-        // confirm delete in a pop-up dialog
-        if (e.target.closest('#deleteButton') && e.target.parentElement.className === 'deleteButtons') {
-            const projectId = deleteDialog.dataset.projectid
-            const currentProject = document.querySelector(`.projectContainer[data-projectid="${projectId}"]`)
-            projectStorage.removeItem(projectId);
-            currentProject.remove()
-            projectStorageSave()
-            deleteDialog.close();
-        }
+  const handleDeleteClick = (e) => {
+    if (e.target.closest(".deleteOption")) {
+      const currentProject = e.target.closest(".projectContainer");
+      const projectName =
+        currentProject.querySelector(".projectName").innerText;
+      const bodyDialog = document.querySelector(".bodyDialog");
+      bodyDialog.innerHTML = `The <b>${projectName}</b> and all of its tasks will be permanently deleted.`;
+      deleteDialog.dataset.projectid = currentProject.dataset.projectid;
+      deleteDialog.showModal();
     }
+  };
 
-    const handleSubmitDialog = (e) => {
-        if (e.target.closest('.dialogForm') && (e.submitter.value === 'Save')) {
-            e.preventDefault()
-            const itemInputs = Object.fromEntries(new FormData(e.target).entries());
-            const dialogProjectId = editProjectDialog.dataset.projectid;
-            const currentProject = document.querySelector(
-                `.projectContainer[data-projectid="${dialogProjectId}"]`);
-            const currentProjectName = currentProject.querySelector('.projectName');
-            currentProjectName.innerText = itemInputs.projectName;
-            const projectToEdit = findProject(dialogProjectId);
-            projectToEdit.name = itemInputs.projectName;
-            editProjectDialog.close()
-            projectStorageSave()
-        }
+  const handleDeleteItemClick = (e) => {
+    // confirm delete in a pop-up dialog
+    if (
+      e.target.closest("#deleteButton") &&
+      e.target.parentElement.className === "deleteButtons"
+    ) {
+      const projectId = deleteDialog.dataset.projectid;
+      const currentProject = document.querySelector(
+        `.projectContainer[data-projectid="${projectId}"]`,
+      );
+      projectStorage.removeItem(projectId);
+      currentProject.remove();
+      projectStorageSave();
+      deleteDialog.close();
     }
+  };
 
-    const handleSubmitForm = (e) => {
-        if (e.target.closest('#addForm') && (e.submitter.value === 'Add')) {
-            e.preventDefault();
-            const i = Object.fromEntries(new FormData(e.target).entries())
-            const newProjectName = i.projectName;
-            projectStorage.items = new logic.Project(newProjectName)
-            const newProject = projectStorage._items.at(-1);
-            const newProjectElement = createProject(newProject)
-            const projectsElement = e.target.closest('.projects');
-            const addFormElement = projectsElement.querySelector('#addForm')
-            addFormElement.insertAdjacentElement('beforebegin', newProjectElement);
-            addFormElement.remove()
-            projectsElement.querySelector('.addItem').classList.toggle('hidden');
-            projectStorageSave()
-        }
+  const handleSubmitDialog = (e) => {
+    if (e.target.closest(".dialogForm") && e.submitter.value === "Save") {
+      e.preventDefault();
+      const itemInputs = Object.fromEntries(new FormData(e.target).entries());
+      const dialogProjectId = editProjectDialog.dataset.projectid;
+      const currentProject = document.querySelector(
+        `.projectContainer[data-projectid="${dialogProjectId}"]`,
+      );
+      const currentProjectName = currentProject.querySelector(".projectName");
+      currentProjectName.innerText = itemInputs.projectName;
+      const projectToEdit = findProject(dialogProjectId);
+      projectToEdit.name = itemInputs.projectName;
+      editProjectDialog.close();
+      projectStorageSave();
     }
-    
-    const checkAddFormStatus = () => {
-        return document.querySelector('#addForm')
+  };
+
+  const handleSubmitForm = (e) => {
+    if (e.target.closest("#addForm") && e.submitter.value === "Add") {
+      e.preventDefault();
+      const i = Object.fromEntries(new FormData(e.target).entries());
+      const newProjectName = i.projectName;
+      projectStorage.items = new logic.Project(newProjectName);
+      const newProject = projectStorage._items.at(-1);
+      const newProjectElement = createProject(newProject);
+      const projectsElement = e.target.closest(".projects");
+      const addFormElement = projectsElement.querySelector("#addForm");
+      addFormElement.insertAdjacentElement("beforebegin", newProjectElement);
+      addFormElement.remove();
+      projectsElement.querySelector(".addItem").classList.toggle("hidden");
+      projectStorageSave();
     }
+  };
 
-    const createAddForm = () => {
-        const addForm = document.createElement('form');
-        addForm.id = 'addForm';
-        const projectMain = document.createElement('div');
-        projectMain.className = 'projectMain';
-        const projectNameInput = document.createElement('input');
-        projectNameInput.className = 'projectNameInput';
-        projectNameInput.placeholder = 'Project name';
-        projectNameInput.required = true;
-        projectNameInput.name = 'projectName';
-        projectMain.append(projectNameInput);
+  const checkAddFormStatus = () => {
+    return document.querySelector("#addForm");
+  };
 
-        addForm.appendChild(projectMain);
-        project.appendFormButtons(addForm, 'projectButtons', 'Add', true)
-        return addForm
+  const createAddForm = () => {
+    const addForm = document.createElement("form");
+    addForm.id = "addForm";
+    const projectMain = document.createElement("div");
+    projectMain.className = "projectMain";
+    const projectNameInput = document.createElement("input");
+    projectNameInput.className = "projectNameInput";
+    projectNameInput.placeholder = "Project name";
+    projectNameInput.required = true;
+    projectNameInput.name = "projectName";
+    projectMain.append(projectNameInput);
+
+    addForm.appendChild(projectMain);
+    project.appendFormButtons(addForm, "projectButtons", "Add", true);
+    return addForm;
+  };
+
+  const initEventListeners = () => {
+    content.addEventListener("click", handleAddItemClick);
+    content.addEventListener("click", handleProjectContainerClick);
+    content.addEventListener("click", handleEditOptionClick);
+    content.addEventListener("click", handleCancelDialogClick);
+    content.addEventListener("input", checkProjectNameInputLength);
+    content.addEventListener("click", handleCancelFormClick);
+    content.addEventListener("click", handleDeleteClick);
+    content.addEventListener("click", handleDeleteItemClick);
+    content.addEventListener("submit", handleSubmitDialog);
+    content.addEventListener("submit", handleSubmitForm);
+  };
+
+  const clearEventListeners = () => {
+    content.removeEventListener("click", handleProjectContainerClick);
+    content.removeEventListener("click", handleEditOptionClick);
+    content.removeEventListener("input", checkProjectNameInputLength);
+    content.removeEventListener("click", handleCancelDialogClick);
+    content.removeEventListener("click", handleCancelFormClick);
+    content.removeEventListener("click", handleDeleteClick);
+    content.removeEventListener("click", handleDeleteItemClick);
+    content.removeEventListener("submit", handleSubmitDialog);
+    content.removeEventListener("submit", handleSubmitForm);
+  };
+
+  const clearPage = () => {
+    clearEventListeners();
+    while (content.hasChildNodes()) {
+      content.removeChild(content.lastChild);
     }
-
-    const initEventListeners = () => {
-        content.addEventListener('click', handleAddItemClick)
-        content.addEventListener('click', handleProjectContainerClick, )
-        content.addEventListener('click', handleEditOptionClick)
-        content.addEventListener('click', handleCancelDialogClick)
-        content.addEventListener('input', checkProjectNameInputLength)
-        content.addEventListener('click', handleCancelFormClick)
-        content.addEventListener('click', handleDeleteClick)
-        content.addEventListener('click', handleDeleteItemClick)
-        content.addEventListener('submit', handleSubmitDialog)
-        content.addEventListener('submit', handleSubmitForm)
+    while (editProjectDialog.hasChildNodes()) {
+      editProjectDialog.removeChild(editProjectDialog.lastChild);
     }
-
-    const clearEventListeners = () => {
-        content.removeEventListener('click', handleProjectContainerClick)
-        content.removeEventListener('click', handleEditOptionClick)
-        content.removeEventListener('input', checkProjectNameInputLength)
-        content.removeEventListener('click', handleCancelDialogClick)
-        content.removeEventListener('click', handleCancelFormClick)
-        content.removeEventListener('click', handleDeleteClick)
-        content.removeEventListener('click', handleDeleteItemClick)
-        content.removeEventListener('submit', handleSubmitDialog)
-        content.removeEventListener('submit', handleSubmitForm)
+    while (deleteDialog.hasChildNodes()) {
+      deleteDialog.removeChild(deleteDialog.lastChild);
     }
+  };
 
-    const clearPage = () => {
-        clearEventListeners()
-        while (content.hasChildNodes()) {
-            content.removeChild(content.lastChild);
-        }
-        while (editProjectDialog.hasChildNodes()) {
-            editProjectDialog.removeChild(editProjectDialog.lastChild)
-        }
-        while (deleteDialog.hasChildNodes()) {
-            deleteDialog.removeChild(deleteDialog.lastChild)
-        }
+  const appendProjects = () => {
+    const projects = document.createElement("div");
+    projects.classList.add("projects");
+    const title = document.createElement("p");
+    title.classList.add("title");
+    title.innerText = "My Projects";
+    projects.appendChild(title);
+
+    for (const project of projectStorage) {
+      let newProject = createProject(project);
+      projects.append(newProject);
     }
+    content.appendChild(projects);
+    project.appendAddButton(projects, "Add project");
+  };
 
-    const appendProjects = () => {
-        const projects = document.createElement('div');
-        projects.classList.add('projects');
-        const title = document.createElement('p');
-        title.classList.add('title');
-        title.innerText = 'My Projects';
-        projects.appendChild(title);
+  const appendDropdown = (item) => {
+    const dropdown = document.createElement("div");
+    dropdown.className = "dropdown";
+    const dropdownButton = document.createElement("button");
+    dropdownButton.classList.add("dropdownButton", "itemButton");
+    const dropdownOptions = document.createElement("div");
+    dropdownOptions.className = "dropdownOptions";
+    const editOption = document.createElement("button");
+    editOption.className = "editOption";
+    editOption.innerText = "Edit";
+    const deleteOption = document.createElement("button");
+    deleteOption.className = "deleteOption";
+    deleteOption.innerText = "Delete";
 
-        for (const project of projectStorage) {
-            let newProject = createProject(project)
-            projects.append(newProject)
-        }
-        content.appendChild(projects)
-        project.appendAddButton(projects, 'Add project')
-    }
+    dropdown.appendChild(dropdownButton);
+    dropdown.appendChild(dropdownOptions);
+    dropdownOptions.appendChild(editOption);
+    dropdownOptions.appendChild(deleteOption);
+    item.appendChild(dropdown);
+  };
 
-    const appendDropdown = (item) => {
-        const dropdown = document.createElement('div');
-        dropdown.className = 'dropdown';
-        const dropdownButton = document.createElement('button');
-        dropdownButton.classList.add('dropdownButton', 'itemButton');
-        const dropdownOptions = document.createElement('div');
-        dropdownOptions.className = 'dropdownOptions';
-        const editOption = document.createElement('button');
-        editOption.className = 'editOption';
-        editOption.innerText = 'Edit'
-        const deleteOption = document.createElement('button');
-        deleteOption.className = 'deleteOption';
-        deleteOption.innerText = 'Delete'
+  const createProject = (project) => {
+    const projectContainer = document.createElement("div");
+    projectContainer.classList.add("projectContainer");
+    const projectName = document.createElement("p");
+    projectName.classList.add("projectName");
+    projectName.innerText = project.name;
+    projectContainer.appendChild(projectName);
+    appendDropdown(projectContainer);
+    projectContainer.setAttribute("data-projectId", project._id);
+    return projectContainer;
+  };
 
-        dropdown.appendChild(dropdownButton);
-        dropdown.appendChild(dropdownOptions);
-        dropdownOptions.appendChild(editOption);
-        dropdownOptions.appendChild(deleteOption);
-        item.appendChild(dropdown)
-    }
+  const initPage = () => {
+    initEventListeners();
+    appendProjects();
+    project.createDeleteDialog(false);
+    createEditProjectName();
+  };
 
-    const createProject = (project) => {
-        const projectContainer = document.createElement('div');
-        projectContainer.classList.add('projectContainer');
-        const projectName = document.createElement('p');
-        projectName.classList.add('projectName');
-        projectName.innerText = project.name;
-        projectContainer.appendChild(projectName);
-        appendDropdown(projectContainer);
-        projectContainer.setAttribute('data-projectId', project._id);
-        return projectContainer
-    }
-
-    const initPage = () => {
-        initEventListeners()
-        appendProjects()
-        project.createDeleteDialog(false)
-        createEditProjectName()
-    }
-
-    return { initPage }
+  return { initPage };
 })();
 
 export { home };

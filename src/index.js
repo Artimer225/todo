@@ -1,19 +1,24 @@
-import './styles.css';
-import { project } from './project.js';
-import { home } from './home.js';
+import "./styles.css";
+import { project } from "./project.js";
+import { home } from "./home.js";
 
-class SectionManager {
-    constructor() {
-        const homePage = document.querySelector('#home');
-        const content = document.querySelector('#content');
+const homePage = document.querySelector("#home");
+homePage.addEventListener("click", (e) => {
+    project.clearPage();
+    home.initPage();
+  });
 
-    homePage.addEventListener('click', e => {
-            project.clearPage()
-            home.initPage()
-        });
-    }
-}
+// class SectionManager {
+//   constructor() {
+//     const homePage = document.querySelector("#home");
+//
+//     homePage.addEventListener("click", (e) => {
+//       project.clearPage();
+//       home.initPage();
+//     });
+//   }
+// }
+//
+// const sectionManagerInstance = new SectionManager();
 
-const sectionManagerInstance = new SectionManager();
-
-home.initPage()
+home.initPage();
