@@ -8,17 +8,4 @@ homePage.addEventListener("click", (e) => {
     home.initPage();
   });
 
-// class SectionManager {
-//   constructor() {
-//     const homePage = document.querySelector("#home");
-//
-//     homePage.addEventListener("click", (e) => {
-//       project.clearPage();
-//       home.initPage();
-//     });
-//   }
-// }
-//
-// const sectionManagerInstance = new SectionManager();
-
 home.initPage();
