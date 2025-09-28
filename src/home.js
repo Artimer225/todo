@@ -4,6 +4,7 @@ import { project } from './project.js'
 const home = (function () {
     const content = document.querySelector('#content');
     const editProjectDialog = document.querySelector('#editProjectDialog')
+    const deleteDialog = document.querySelector('#deleteDialog')
 
     const createEditProjectName = () => {
         editProjectDialog.setAttribute('data-projectId', '');
@@ -54,7 +55,6 @@ const home = (function () {
         if (e.target.closest('.projectName')) {
             const projectId = e.target.closest('.projectContainer').dataset.projectid
             clearPage()
-            // project.createItemEditForm()
             const theProject = findProject(projectId);
             project.initPage(theProject)
         }
@@ -84,6 +84,10 @@ const home = (function () {
         if (e.target.value === 'Cancel' && e.target.closest('.dialogFormButtons')) {
             editProjectDialog.close()
         }
+        if (e.target.closest('.cancelButton') && e.target.parentElement.className === 'deleteButtons'){
+            e.preventDefault()
+            deleteDialog.close()
+        }
     }
 
     const handleCancelFormClick = (e) => {
@@ -99,9 +103,23 @@ const home = (function () {
     const handleDeleteClick = (e) => {
         if (e.target.closest('.deleteOption')) {
             const currentProject = e.target.closest('.projectContainer');
-            projectStorage.removeItem(currentProject.dataset.projectid);
+            const projectName = currentProject.querySelector('.projectName').innerText;
+            const bodyDialog = document.querySelector('.bodyDialog')
+            bodyDialog.innerHTML = `The <b>${projectName}</b> and all of its tasks will be permanently deleted.`;
+            deleteDialog.dataset.projectid = currentProject.dataset.projectid
+            deleteDialog.showModal()
+        }
+    }
+
+    const handleDeleteItemClick = (e) => {
+        // confirm delete in a pop-up dialog
+        if (e.target.closest('#deleteButton') && e.target.parentElement.className === 'deleteButtons') {
+            const projectId = deleteDialog.dataset.projectid
+            const currentProject = document.querySelector(`.projectContainer[data-projectid="${projectId}"]`)
+            projectStorage.removeItem(projectId);
             currentProject.remove()
             projectStorageSave()
+            deleteDialog.close();
         }
     }
 
@@ -116,7 +134,6 @@ const home = (function () {
             currentProjectName.innerText = itemInputs.projectName;
             const projectToEdit = findProject(dialogProjectId);
             projectToEdit.name = itemInputs.projectName;
-            // console.log(projectStorage)
             editProjectDialog.close()
             projectStorageSave()
         }
@@ -168,6 +185,7 @@ const home = (function () {
         content.addEventListener('input', checkProjectNameInputLength)
         content.addEventListener('click', handleCancelFormClick)
         content.addEventListener('click', handleDeleteClick)
+        content.addEventListener('click', handleDeleteItemClick)
         content.addEventListener('submit', handleSubmitDialog)
         content.addEventListener('submit', handleSubmitForm)
     }
@@ -179,6 +197,7 @@ const home = (function () {
         content.removeEventListener('click', handleCancelDialogClick)
         content.removeEventListener('click', handleCancelFormClick)
         content.removeEventListener('click', handleDeleteClick)
+        content.removeEventListener('click', handleDeleteItemClick)
         content.removeEventListener('submit', handleSubmitDialog)
         content.removeEventListener('submit', handleSubmitForm)
     }
@@ -190,6 +209,9 @@ const home = (function () {
         }
         while (editProjectDialog.hasChildNodes()) {
             editProjectDialog.removeChild(editProjectDialog.lastChild)
+        }
+        while (deleteDialog.hasChildNodes()) {
+            deleteDialog.removeChild(deleteDialog.lastChild)
         }
     }
 
@@ -245,6 +267,7 @@ const home = (function () {
     const initPage = () => {
         initEventListeners()
         appendProjects()
+        project.createDeleteDialog(false)
         createEditProjectName()
     }
 

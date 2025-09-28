@@ -6,7 +6,6 @@ class SectionManager {
     constructor() {
         const homePage = document.querySelector('#home');
         const content = document.querySelector('#content');
-        const editDialog = document.querySelector('#editDialog');
 
     homePage.addEventListener('click', e => {
             project.clearPage()

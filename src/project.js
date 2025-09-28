@@ -60,7 +60,7 @@ const project= (function () {
         itemUpperPanel.appendChild(itemCloseButton);
 
         const itemEdit = document.createElement('div');
-        itemEdit.classList.add('itemEdit');
+        itemEdit.classList.add('itemEdit', 'itemEditInput');
         const inputName = document.createElement('textarea');
         inputName.name = 'itemName';
         inputName.placeholder = 'Task name';
@@ -98,13 +98,17 @@ const project= (function () {
         content.appendChild(editDialog);
     }
 
-    const createDeleteDialog = () => {
-        deleteDialog.dataset.itemid = '';
+    const createDeleteDialog = (item = true) => {
         deleteDialog.dataset.projectid = '';
         const titleDialog = document.createElement('p');
         titleDialog.className = 'titleDialog';
+        if (item) {
+            titleDialog.innerText = 'Delete task?';
+            deleteDialog.dataset.itemid = '';
+        } else {
+            titleDialog.innerText = 'Delete project?';
+        }
 
-        titleDialog.innerText = 'Delete task?';
         const bodyDialog = document.createElement('p');
         bodyDialog.className = 'bodyDialog';
 
@@ -365,7 +369,6 @@ const project= (function () {
             item.remove()
             projectStorageSave()
             deleteDialog.close();
-            deleteDialog.remove()
             editDialog.close();
         }
     }
@@ -446,7 +449,7 @@ const project= (function () {
         content.removeEventListener('click', handleItemContainerClick)
         content.removeEventListener('click', handleCheckboxClick)
         content.removeEventListener('click', handleAddTaskClick)
-        content.removeEventListener('click', checkNameInputLength)
+        content.removeEventListener('input', checkNameInputLength)
         content.removeEventListener('click', handleDialogCancelClick)
         content.removeEventListener('click', handleAddFormCancelClick)
         content.removeEventListener('click', handleDeleteItemClick)
